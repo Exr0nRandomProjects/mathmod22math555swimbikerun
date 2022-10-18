@@ -18,6 +18,14 @@ const TIME_COMPONENTS = ["SWIM", "T1", "BIKE", "T2", "RUN"]
 grouped_to_2d(gd) = @chain gd select(TIME_COMPONENTS)
 kv_namedtuple(ks, vs) = (; zip(Symbol.(ks), vs)... )
 
+# nt_histogram(nt, args...; kwargs...) = histogram(nt|>values, labels=nt|>keys|>collect.|>string|>permutedims, args...; kwargs...)
+
+function nt_histogram(nt, args...; kwargs...) 
+    @show (@chain nt values collect)
+    @show nt|>keys|>collect.|>string|>permutedims
+    histogram(nt|>values|>collect, labels=nt|>keys|>collect.|>string|>permutedims, args...; kwargs...)
+end
+
 df = @chain df begin
     dropmissing
     transform(TIME_COMPONENTS .=> ByRow(x -> Dates.value(x)/1e9), renamecols=false)
@@ -61,4 +69,11 @@ cum_df = @chain df begin
         (r...) -> kv_namedtuple(  (@chain TIME_COMPONENTS string.("cum_", _)), r |> cumsum  )
     ) => AsTable)
 end
+# println(names(cum_df, r"cum_"))
+# gd = @chain cum_df groupby(:CATEGORY)
+# data(category) = [category[!, checkpoint] for checkpoint in names(cum_df, r"cum_")]
+# @show data(first(gd))
+# plots = [ histogram([]) for category in gd ]
+
+nt_histogram((; alpha=rand(100000), beta=rand(200000).*10 .+5))
 
