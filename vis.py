@@ -8,13 +8,14 @@ import datetime
 epoch = datetime.datetime.utcfromtimestamp(0)
 
 def unix_time_millis(dt):
-    return (dt - epoch).total_seconds() * 1000.0
+    print(dt)
+    # return (dt - epoch).total_seconds() * 1000.0
 
-data = [x for x in df['BIKE']]
+data = [unix_time_millis(x) for x in df['BIKE'] if x is not None and not isNan(x)]
 print(data[0])
 
-plt.hist(df['BIKE'])
-plt.show()
-
-print(df)
-
+# plt.hist(df['BIKE'])
+# plt.show()
+#
+# print(df)
+#
