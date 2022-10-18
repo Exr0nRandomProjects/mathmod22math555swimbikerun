@@ -21,9 +21,7 @@ kv_namedtuple(ks, vs) = (; zip(Symbol.(ks), vs)... )
 # nt_histogram(nt, args...; kwargs...) = histogram(nt|>values, labels=nt|>keys|>collect.|>string|>permutedims, args...; kwargs...)
 
 function nt_histogram(nt, args...; kwargs...) 
-    @show (@chain nt values collect)
-    @show nt|>keys|>collect.|>string|>permutedims
-    histogram(nt|>values|>collect, labels=nt|>keys|>collect.|>string|>permutedims, args...; kwargs...)
+    histogram(nt|>values|>collect, labels=nt|>keys|>collect.|>string|>permutedims, linewidth=0, alpha=0.8, args...; kwargs...)
 end
 
 df = @chain df begin
@@ -56,24 +54,17 @@ end
 # end
 
 
-# cum_df = @chain df begin
-#     transform(_, TIME_COMPONENTS => ByRow((r...) -> Dict(
-#         k => v
-#     for (k, v) in zip(
-#         (@chain TIME_COMPONENTS string.("cum_", _)),
-#         r |> cumsum
-#     ))) => AsTable)
-# end
 cum_df = @chain df begin
     transform(_, TIME_COMPONENTS => ByRow(
         (r...) -> kv_namedtuple(  (@chain TIME_COMPONENTS string.("cum_", _)), r |> cumsum  )
     ) => AsTable)
 end
-# println(names(cum_df, r"cum_"))
-# gd = @chain cum_df groupby(:CATEGORY)
-# data(category) = [category[!, checkpoint] for checkpoint in names(cum_df, r"cum_")]
-# @show data(first(gd))
-# plots = [ histogram([]) for category in gd ]
 
-nt_histogram((; alpha=rand(100000), beta=rand(200000).*10 .+5))
+gd = @chain cum_df groupby(:CATEGORY)
+# show events forall category
+data(category) = kv_namedtuple( names(cum_df, r"cum_"), names(cum_df, r"cum_") .|> (checkpoint -> category[!, checkpoint]) )
+
+hists = [nt_histogram(data(category), title=category[1, :CATEGORY]) for category in gd]
+
+# show/compare category forall event
 
