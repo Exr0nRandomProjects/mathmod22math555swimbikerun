@@ -18,10 +18,9 @@ using Chain
 
 res = @chain df begin
     dropmissing
+    # transform(_, :CATEGORY => ByRow(r -> (println(r); @chain r split (; gender=_[1], level=_[2]) )) => :EMACS)
     groupby(_, :CATEGORY)
-    # transform(_, :SWIM => (x -> Dates.value(x)/1e9), renamecols=false)
-    transform(_, [:SWIM, :T1, :BIKE, :T2, :RUN] .=> (x -> Dates.value.(x)/1e9), renamecols=false)
-    # transform(_, [:SWIM, :T1, :BIKE, :T2, :RUN] .=> (x -> println(x)), renamecols=false)
+    transform(_, [:SWIM, :T1, :BIKE, :T2, :RUN] .=> ByRow(x -> Dates.value(x)/1e9), renamecols=false)
 end
 
 # series, labels = 
