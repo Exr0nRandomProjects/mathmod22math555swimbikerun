@@ -67,4 +67,10 @@ data(category) = kv_namedtuple( names(cum_df, r"cum_"), names(cum_df, r"cum_") .
 hists = [nt_histogram(data(category), title=category[1, :CATEGORY]) for category in gd]
 
 # show/compare category forall event
+gd = @chain cum_df groupby(:CATEGORY)
+category_names = cum_df[!, :CATEGORY] |> unique
+# @show data(event) = kv_namedtuple( category_names, category_names .|> (cn -> cum_df[cum_df[!, :CATEGORY] == cn, event]) )
+data(event) = kv_namedtuple( category_names, category_names .|> (cn -> gd[(cn,)][!, event]) )
+hists = [ nt_histogram(data(event), title=event) for event in names(cum_df, r"cum_") ]
+# plot(hists...)
 
